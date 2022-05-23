@@ -28,7 +28,7 @@ With this you will have an environment with 2 users:
 prueba@mail.com - 123123123
 
 2.- Student:
-prueba@mail.com - 123123123
+student@mail.com - 123123123
 
 If you log as teachear, you can create Titles, Courses and Qualify students courses.
 
