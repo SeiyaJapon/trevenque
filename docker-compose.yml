@@ -1,0 +1,63 @@
+version: '3.7'
+
+services:
+  trevenque-web:
+    container_name: trevenque-web
+    build:
+      context: ./docker/nginx
+      args:
+        user: trevenque
+        UID: 501
+    ports:
+      - 350:80
+    volumes:
+      - ./src:/var/www
+    depends_on:
+      - trevenque-be
+    networks:
+      - trevenque-dev-network
+
+  trevenque-be:
+    container_name: trevenque-be
+    build:
+      context: ./docker/php
+      args:
+        user: trevenque
+        UID: 501
+    environment:
+      PHP_IDE_CONFIG: serverName=Docker
+      PHP_XDEBUG_ENABLED: 1
+      XDEBUG_CONFIG: remote_host=host.docker.internal remote_port=9005 # MacOS users
+    volumes:
+      - ./src:/var/www
+      - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+      - ~/.ssh/id_rsa:/home/appuser/.ssh/trevenque
+    depends_on:
+      - trevenque-db
+    networks:
+      - trevenque-dev-network
+
+  trevenque-db:
+    container_name: trevenque-db
+    # image: mysql:8.0
+    build:
+      context: ./docker/database
+    ports:
+      - 36001:3306
+    environment:
+      MYSQL_DATABASE: TrevenqueDb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root
+    command: mysqld --sql_mode="STRICT_ALL_TABLES,NO_ENGINE_SUBSTITUTION"
+    volumes:
+      - trevenque-db-data:/var/lib/mysql
+    networks:
+      - trevenque-dev-network
+
+volumes:
+  trevenque-db-data:
+
+networks:
+  trevenque-dev-network:
+    external: true
